@@ -92,7 +92,7 @@ public class ExprNBTOf extends SimpleExpression<Object> {
 				NMS.setEntityNBT((Entity) tar, NBTTagCompound.get().cast(entNBT));
 			} else if (mode == ChangeMode.REMOVE) {
 				for (Object s : args) {
-					if (s != "UUIDMost" || s != "UUIDLeast" || s != "WorldUUIDMost" || s != "WorldUUIDLeast" || s != "Bukkit.updateLevel") { // Prevent crucial data from being modified
+					if (s != "UUIDMost" || s != "UUIDLeast" || s != "WorldUUIDMost" || s != "WorldUUIDLeast" || s != "Bukkit.updateLevel") { 
 						NMS.removeFromCompound(NBTTagCompound.get().cast(entNBT), (String) s);
 					}
 				}
