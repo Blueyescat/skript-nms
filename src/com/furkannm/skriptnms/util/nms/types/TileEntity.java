@@ -1,11 +1,15 @@
 package com.furkannm.skriptnms.util.nms.types;
 
 import com.furkannm.skriptnms.Core;
+import com.furkannm.skriptnms.util.nms.NMSClasses;
 
-public class TileEntity {
+@SuppressWarnings("rawtypes")
+public class TileEntity extends NMSClasses{
+
+	private static Class nmsClass;
 	
-	@SuppressWarnings("rawtypes")
-	public static Class get() {
+	@Override
+	public void set() {
 		Class TileEntity = null;
 		try {
 			TileEntity = Class.forName("net.minecraft.server."+Core.getVer()+".TileEntity");
@@ -13,6 +17,10 @@ public class TileEntity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return TileEntity;
+		nmsClass = TileEntity;
+	}
+	
+	public static Class get() {
+		return nmsClass;
 	}
 }

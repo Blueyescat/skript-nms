@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -19,17 +20,19 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.util.slot.Slot;
 
 import com.furkannm.skriptnms.Core;
 import com.furkannm.skriptnms.util.nms.types.BlockPosition;
 import com.furkannm.skriptnms.util.nms.types.CraftEntity;
 import com.furkannm.skriptnms.util.nms.types.CraftItemStack;
 import com.furkannm.skriptnms.util.nms.types.CraftWorld;
-import com.furkannm.skriptnms.util.nms.types.DatFile;
 import com.furkannm.skriptnms.util.nms.types.IBlockData;
 import com.furkannm.skriptnms.util.nms.types.MojangsonParser;
+import com.furkannm.skriptnms.util.nms.types.NBTBase;
 import com.furkannm.skriptnms.util.nms.types.NBTCompressedStreamTools;
 import com.furkannm.skriptnms.util.nms.types.NBTTagByte;
+import com.furkannm.skriptnms.util.nms.types.NBTTagCompound;
 import com.furkannm.skriptnms.util.nms.types.NBTTagDouble;
 import com.furkannm.skriptnms.util.nms.types.NBTTagFloat;
 import com.furkannm.skriptnms.util.nms.types.NBTTagInt;
@@ -41,6 +44,79 @@ import com.furkannm.skriptnms.util.nms.types.World;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class NMS {
+	
+
+	public static Object[] getNBT(Object tar) {
+		if (tar instanceof Entity) {
+			return new Object[] { NBTTagCompound.get().cast(getEntityNBT((Entity) tar)) };
+		}else if (tar instanceof Block) {
+			return new Object[] { NBTTagCompound.get().cast(getTileNBT((Block) tar)) };
+		}else if (tar instanceof ItemStack) {
+			return new Object[] { NBTTagCompound.get().cast(getItemNBT((ItemStack) tar)) };
+		}else if (tar instanceof Slot) {
+			return new Object[] { NBTTagCompound.get().cast(getItemNBT(((Slot) tar).getItem())) };
+		}
+		return null;
+	}
+	
+	public static void addTargetsNBT(Object tar,Object nbt) {
+		if (tar instanceof Entity) {
+			Object entNBT = NBTTagCompound.get().cast(NMS.getEntityNBT((Entity) tar));
+			removeFromCompound(NBTTagCompound.get().cast(nbt), "UUIDMost", "UUIDLeast", "WorldUUDMost", "WorldUUIDLeast", "Bukkit.updateLevel");
+			addToCompound(NBTTagCompound.get().cast(entNBT), NBTTagCompound.get().cast(nbt));
+			setEntityNBT((Entity) tar, NBTTagCompound.get().cast(entNBT));
+		}else if (tar instanceof Block) {
+			Object blockNBT = NBTTagCompound.get().cast(NMS.getTileNBT((Block) tar));
+			removeFromCompound(NBTTagCompound.get().cast(nbt), "x", "y", "z", "id");
+			addToCompound(NBTTagCompound.get().cast(blockNBT), NBTTagCompound.get().cast(nbt));
+			setTileNBT((Block) tar, NBTTagCompound.get().cast(blockNBT));
+		}else if (tar instanceof ItemStack) {
+			Skript.warning("Failed to change the NBT of an item: Itemstack didn't have any slot attached to it.");
+		}else if (tar instanceof Slot) {
+			ItemStack slotItem = ((Slot) tar).getItem();
+			Object itemNBT = NBTTagCompound.get().cast(NMS.getItemNBT(slotItem));
+			NMS.addToCompound(NBTTagCompound.get().cast(itemNBT), NBTTagCompound.get().cast(nbt));
+			ItemStack newItem = NMS.getItemWithNBT(slotItem, NBTTagCompound.get().cast(itemNBT));
+			((Slot) tar).setItem(newItem);
+		}
+	}	
+	
+	public static void removeTargetsNBT(Object tar,Object[] nbt) {
+		if (tar instanceof Entity) {
+			Object entNBT = NBTTagCompound.get().cast(NMS.getEntityNBT((Entity) tar));
+			for (Object s : nbt) {
+				if (s != "UUIDMost" || s != "UUIDLeast" || s != "WorldUUIDMost" || s != "WorldUUIDLeast" || s != "Bukkit.updateLevel") { 
+					NMS.removeFromCompound(NBTTagCompound.get().cast(entNBT), (String) s);
+				}
+			}
+			NMS.setEntityNBT((Entity) tar, NBTTagCompound.get().cast(entNBT));
+		}else if (tar instanceof Block) {
+			Object blockNBT = NBTTagCompound.get().cast(NMS.getTileNBT((Block) tar));
+			for (Object s : nbt) {
+				if (s != "x" || s != "y" || s != "z" || s != "id") {
+					NMS.removeFromCompound(NBTTagCompound.get().cast(blockNBT), (String) s);
+				}
+			}
+			NMS.setTileNBT((Block) tar, NBTTagCompound.get().cast(blockNBT));
+		}else if (tar instanceof ItemStack) {
+			Skript.warning("Failed to change the NBT of an item: Itemstack didn't have any slot attached to it.");
+		}else if (tar instanceof Slot) {
+			ItemStack slotItem = ((Slot) tar).getItem();
+			Object itemNBT = NBTTagCompound.get().cast(NMS.getItemNBT(slotItem));
+			String[] toRemove = Arrays.copyOf(nbt, nbt.length, String[].class);
+			NMS.removeFromCompound(itemNBT, toRemove);
+			ItemStack newItem = NMS.getItemWithNBT(slotItem, NBTTagCompound.get().cast(itemNBT));
+			((Slot) tar).setItem(newItem);
+		}
+	}
+	
+	public static void deleteTargetsNBT(Object tar) {
+		if (tar instanceof Slot) {
+			ItemStack slotItem = ((Slot) tar).getItem();
+			ItemStack newItem = NMS.getItemWithNBT(slotItem, NBTTagCompound.get().cast(null));
+			((Slot) tar).setItem(newItem);
+		}
+	}
 	
 	public static Object getNBTTag(Object compound, String tag) {
 		try {
@@ -106,7 +182,6 @@ public class NMS {
 		if (NBTTagComp.isInstance(compound)) {
 			try {
 				for (String s : toRemove) {		
-					Bukkit.getServer().broadcastMessage(s);
 					Method m =(NBTTagComp.cast(compound)).getClass().getMethod("remove", String.class);			
 					m.invoke(NBTTagComp.cast(compound),s);
 				}
@@ -356,7 +431,7 @@ public class NMS {
 				ex.printStackTrace();
 			}
 			try {
-				NBTCompressedStreamTools.get().getMethod("a", NBTTagCompound.get(), OutputStream.class).invoke(NBTCompressedStreamTools.get(),NBTTagCompound.get().cast(newCompound), os);
+				NBTCompressedStreamTools.get().getMethod("a", NBTTagCompound.get(), OutputStream.class).invoke(NBTCompressedStreamTools.get(), NBTTagCompound.get().cast(newCompound), os);
 				os.close();
 			} catch (IOException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				if (!(e instanceof EOFException)) {

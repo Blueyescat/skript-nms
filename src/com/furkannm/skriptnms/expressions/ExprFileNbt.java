@@ -6,18 +6,20 @@ import javax.annotation.Nullable;
 
 import org.bukkit.event.Event;
 
+import ch.njol.skript.Skript;
 import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.lang.Expression;
+import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 
-import com.furkannm.skriptnms.util.nms.NBTTagCompound;
+import com.furkannm.skriptnms.util.nms.DatFile;
 import com.furkannm.skriptnms.util.nms.NMS;
-import com.furkannm.skriptnms.util.nms.types.DatFile;
+import com.furkannm.skriptnms.util.nms.types.NBTTagCompound;
 
 @Name("File NBT")
 @Examples({
@@ -27,6 +29,10 @@ import com.furkannm.skriptnms.util.nms.types.DatFile;
 
 public class ExprFileNbt extends SimpleExpression<Object>{
 
+	static {
+		Skript.registerExpression(ExprFileNbt.class, Object.class, ExpressionType.PROPERTY, "nbt[[ ]tag[s]] from [file] %string%", "nbt[[ ]tag[s]] from last loaded [dat ]file", "last loaded [dat ]file's nbt[[ ]tag[s]]");
+	}
+	
 	private Expression<Object> target;
 	
 	@SuppressWarnings("unchecked")
@@ -85,11 +91,11 @@ public class ExprFileNbt extends SimpleExpression<Object>{
 		if(target != null) {
 			Object f = target.getSingle(e);
 			f = f.toString().endsWith(".dat") ? f.toString() : f.toString() + ".dat";
-			file = new File(f.toString());
-		
+			file = new File(f.toString());	
 		}else{
 			file = DatFile.getFile();
 		}
+		
 		Object parsedNBT = null;
 		if (args != null) {
 			parsedNBT = NBTTagCompound.get().cast(NMS.parseRawNBT(((String) args[0])));

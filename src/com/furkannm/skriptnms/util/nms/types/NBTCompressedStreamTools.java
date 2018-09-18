@@ -1,18 +1,26 @@
 package com.furkannm.skriptnms.util.nms.types;
 
 import com.furkannm.skriptnms.Core;
+import com.furkannm.skriptnms.util.nms.NMSClasses;
 
-public class NBTCompressedStreamTools {
+@SuppressWarnings("rawtypes")
+public class NBTCompressedStreamTools extends NMSClasses{
+
+	private static Class nmsClass;
 	
-	@SuppressWarnings("rawtypes")
-	public static Class get() {
+	@Override
+	public void set() {
 		Class NBTCompressedStreamTools = null;
 		try {
 			NBTCompressedStreamTools = Class.forName("net.minecraft.server."+Core.getVer()+".NBTCompressedStreamTools");
 		} catch (SecurityException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
-		return NBTCompressedStreamTools;
+		nmsClass = NBTCompressedStreamTools;
+	}
+	
+	public static Class get() {
+		return nmsClass;
 	}
 }

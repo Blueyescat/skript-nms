@@ -1,18 +1,26 @@
 package com.furkannm.skriptnms.util.nms.types;
 
 import com.furkannm.skriptnms.Core;
+import com.furkannm.skriptnms.util.nms.NMSClasses;
 
-public class CraftItemStack {
+@SuppressWarnings("rawtypes")
+public class CraftItemStack extends NMSClasses{
 	
-	@SuppressWarnings("rawtypes")
-	public static Class get() {
+	private static Class nmsClass;
+	
+	@Override
+	public void set() {
 		Class CraftItemStack = null;
 		try {
 			CraftItemStack = Class.forName("org.bukkit.craftbukkit."+Core.getVer()+".inventory.CraftItemStack");
 		} catch (SecurityException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
-		return CraftItemStack;
+		nmsClass = CraftItemStack;
+	}
+	
+	public static Class get() {
+		return nmsClass;
 	}
 }

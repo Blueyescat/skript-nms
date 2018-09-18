@@ -1,18 +1,26 @@
 package com.furkannm.skriptnms.util.nms.types;
 
 import com.furkannm.skriptnms.Core;
+import com.furkannm.skriptnms.util.nms.NMSClasses;
 
-public class NBTTagFloat {
+@SuppressWarnings("rawtypes")
+public class NBTTagFloat extends NMSClasses{
+
+	private static Class nmsClass;
 	
-	@SuppressWarnings("rawtypes")
-	public static Class get() {
+	@Override
+	public void set() {
 		Class NBTTagFloat = null;
 		try {
 			NBTTagFloat = Class.forName("net.minecraft.server."+Core.getVer()+".NBTTagFloat");
 		} catch (SecurityException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
-		return NBTTagFloat;
+		nmsClass = NBTTagFloat;
+	}
+	
+	public static Class get() {
+		return nmsClass;
 	}
 }

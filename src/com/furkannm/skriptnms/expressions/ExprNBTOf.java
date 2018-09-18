@@ -1,7 +1,5 @@
 package com.furkannm.skriptnms.expressions;
 
-import java.util.Arrays;
-
 import javax.annotation.Nullable;
 
 import org.bukkit.block.Block;
@@ -14,6 +12,7 @@ import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.lang.Expression;
+import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.log.ErrorQuality;
@@ -21,8 +20,8 @@ import ch.njol.skript.util.slot.Slot;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 
-import com.furkannm.skriptnms.util.nms.NBTTagCompound;
 import com.furkannm.skriptnms.util.nms.NMS;
+import com.furkannm.skriptnms.util.nms.types.NBTTagCompound;
 
 @Name("NBT of")
 @Examples({
@@ -32,6 +31,10 @@ import com.furkannm.skriptnms.util.nms.NMS;
 
 public class ExprNBTOf extends SimpleExpression<Object> {
 
+	static {
+		Skript.registerExpression(ExprNBTOf.class, Object.class, ExpressionType.PROPERTY, "nbt[[ ]tag[s]] of %~object%", "%~object%'s nbt[[ ]tag[s]]");
+	}
+	
 	private Expression<Object> target;
 	
 	@SuppressWarnings("unchecked")
@@ -65,16 +68,7 @@ public class ExprNBTOf extends SimpleExpression<Object> {
 	@Nullable
 	protected Object[] get(Event e) {
 		Object tar = target.getSingle(e);
-		if (tar instanceof Entity) {
-			return new Object[] { NBTTagCompound.get().cast(NMS.getEntityNBT((Entity) tar)) };
-		} else if (tar instanceof Block) {
-			return new Object[] { NBTTagCompound.get().cast(NMS.getTileNBT((Block) tar)) };
-		} else if (tar instanceof ItemStack) {
-			return new Object[] { NBTTagCompound.get().cast(NMS.getItemNBT((ItemStack) tar)) };
-		} else if (tar instanceof Slot) {
-			return new Object[] { NBTTagCompound.get().cast(NMS.getItemNBT(((Slot) tar).getItem())) };
-		}
-		return null;
+		return NMS.getNBT(tar);
 	}
 
 	@Override
@@ -84,54 +78,12 @@ public class ExprNBTOf extends SimpleExpression<Object> {
 		if (args != null) {
 			parsedNBT = NBTTagCompound.get().cast(NMS.parseRawNBT(((String) args[0])));
 		}
-		if (tar instanceof Entity) {
-			Object entNBT = NBTTagCompound.get().cast(NMS.getEntityNBT((Entity) tar));
-			if (mode == ChangeMode.ADD) {
-				NMS.removeFromCompound(NBTTagCompound.get().cast(parsedNBT), "UUIDMost", "UUIDLeast", "WorldUUDMost", "WorldUUIDLeast", "Bukkit.updateLevel");
-				NMS.addToCompound(NBTTagCompound.get().cast(entNBT), NBTTagCompound.get().cast(parsedNBT));
-				NMS.setEntityNBT((Entity) tar, NBTTagCompound.get().cast(entNBT));
-			} else if (mode == ChangeMode.REMOVE) {
-				for (Object s : args) {
-					if (s != "UUIDMost" || s != "UUIDLeast" || s != "WorldUUIDMost" || s != "WorldUUIDLeast" || s != "Bukkit.updateLevel") { 
-						NMS.removeFromCompound(NBTTagCompound.get().cast(entNBT), (String) s);
-					}
-				}
-				NMS.setEntityNBT((Entity) tar, NBTTagCompound.get().cast(entNBT));
-			}
-		} else if (tar instanceof Block) {
-			Object blockNBT = NBTTagCompound.get().cast(NMS.getTileNBT((Block) tar));
-			if (mode == ChangeMode.ADD) {
-				NMS.removeFromCompound(NBTTagCompound.get().cast(parsedNBT), "x", "y", "z", "id");
-				NMS.addToCompound(NBTTagCompound.get().cast(blockNBT), NBTTagCompound.get().cast(parsedNBT));
-				NMS.setTileNBT((Block) tar, NBTTagCompound.get().cast(blockNBT));
-			} else if (mode == ChangeMode.REMOVE) {
-				for (Object s : args) {
-					if (s != "x" || s != "y" || s != "z" || s != "id") {
-						NMS.removeFromCompound(NBTTagCompound.get().cast(blockNBT), (String) s);
-					}
-				}
-				NMS.setTileNBT((Block) tar, NBTTagCompound.get().cast(blockNBT));
-			}
-		} else if (tar instanceof ItemStack) {
-			if (mode == ChangeMode.ADD || mode == ChangeMode.REMOVE || mode == ChangeMode.DELETE || mode == ChangeMode.RESET) {
-				Skript.warning("Failed to change the NBT of an item: Itemstack didn't have any slot attached to it.");
-			}
-		} else if (tar instanceof Slot) {
-			ItemStack slotItem = ((Slot) tar).getItem();
-			Object itemNBT = NBTTagCompound.get().cast(NMS.getItemNBT(slotItem));
-			if (mode == ChangeMode.ADD) {
-				NMS.addToCompound(NBTTagCompound.get().cast(itemNBT), NBTTagCompound.get().cast(parsedNBT));
-				ItemStack newItem = NMS.getItemWithNBT(slotItem, NBTTagCompound.get().cast(itemNBT));
-				((Slot) tar).setItem(newItem);
-			} else if (mode == ChangeMode.REMOVE) {
-				String[] toRemove = Arrays.copyOf(args, args.length, String[].class);
-				NMS.removeFromCompound(itemNBT, toRemove);
-				ItemStack newItem = NMS.getItemWithNBT(slotItem, NBTTagCompound.get().cast(itemNBT));
-				((Slot) tar).setItem(newItem);
-			} else if (mode == ChangeMode.DELETE || mode == ChangeMode.RESET) {
-				ItemStack newItem = NMS.getItemWithNBT(slotItem, NBTTagCompound.get().cast(null));
-				((Slot) tar).setItem(newItem);
-			}
+		if (mode == ChangeMode.ADD) {
+			NMS.addTargetsNBT(tar, parsedNBT);
+		}else if (mode == ChangeMode.REMOVE) {
+			NMS.removeTargetsNBT(tar, args);
+		}else if (mode == ChangeMode.DELETE || mode == ChangeMode.RESET) {
+			NMS.deleteTargetsNBT(tar);
 		}
 	}
 

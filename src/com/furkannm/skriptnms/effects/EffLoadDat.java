@@ -23,6 +23,10 @@ import ch.njol.util.Kleenean;
 
 public class EffLoadDat extends Effect {
 
+	static {
+		Skript.registerEffect(EffLoadDat.class, "load nbt[[ ]tag[s]] from [file] %string%","load %string%'s nbt[[ ]tag[s]]");
+	}
+	
 	//load dat file in %string%
 	private File lastLoadedFile = null;
 	private Expression<String> fileName;
