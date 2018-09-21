@@ -30,7 +30,7 @@ import com.furkannm.skriptnms.util.nms.types.NBTTagCompound;
 public class ExprFileNbt extends SimpleExpression<Object>{
 
 	static {
-		Skript.registerExpression(ExprFileNbt.class, Object.class, ExpressionType.PROPERTY, "nbt[[ ]tag[s]] from [file] %string%", "nbt[[ ]tag[s]] from last loaded [dat ]file", "last loaded [dat ]file's nbt[[ ]tag[s]]");
+		Skript.registerExpression(ExprFileNbt.class, Object.class, ExpressionType.PROPERTY, "nbt[[ ]tag[s]] from [file] %string%", "nbt[[ ]tag[s]] from last loaded [dat ]file");
 	}
 	
 	private Expression<Object> target;
