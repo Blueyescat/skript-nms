@@ -17,20 +17,18 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 
+import com.furkannm.skriptnms.SkriptNMS;
 import com.furkannm.skriptnms.util.nms.DatFile;
-import com.furkannm.skriptnms.util.nms.NMS;
-import com.furkannm.skriptnms.util.nms.types.NBTTagCompound;
+import com.furkannm.skriptnms.util.nms.versions.types.NBTTagCompound;
 
 @Name("File NBT")
-@Examples({
-		"nbt from \"world/level.dat\"",
-		"last loaded file's nbt"
-})
+@Examples({"nbt from \"world/level.dat\"",
+		"last loaded file's nbt"})
 
 public class ExprFileNbt extends SimpleExpression<Object>{
 
 	static {
-		Skript.registerExpression(ExprFileNbt.class, Object.class, ExpressionType.PROPERTY, "nbt[[ ]tag[s]] from [file] %string%", "nbt[[ ]tag[s]] from last loaded [dat ]file");
+		Skript.registerExpression(ExprFileNbt.class, Object.class, ExpressionType.PROPERTY, "nbt[[ ]tag[s]] from [file] %string%", "nbt[[ ]tag[s]] from last loaded [dat ]file", "last loaded [dat ]file's nbt[[ ]tag[s]]");
 	}
 	
 	private Expression<Object> target;
@@ -59,57 +57,44 @@ public class ExprFileNbt extends SimpleExpression<Object>{
 
 	@Override
 	public String toString(@Nullable Event e, boolean debug) {
-		if(target != null) {
-			return "the NBT from file " + target.toString(e, debug);
-		}else{
-			if(DatFile.getFile() != null) {
-				return "the NBT from file " + DatFile.getFile().getName();
-			}else{
-				return null;
-			}
-		}
+		if(target != null) return "the NBT from file " + target.toString(e, debug);	
+		if(DatFile.getFile() != null) return "the NBT from file " + DatFile.getFile().getName();
+		return null;	
 	}
 
 	@Override
 	@Nullable
 	protected Object[] get(Event e) {
-		if (target != null) {
-			Object file = target.getSingle(e);
-			file = file.toString().endsWith(".dat") ? file.toString() : file.toString() + ".dat";
-			File f = new File(file.toString());
-			if(!f.exists()) return null;
-			NMS.loadFileNbt(f);
-			return new Object[] { NBTTagCompound.get().cast(DatFile.getNbt()) };
-		}else{
-			return new Object[] { NBTTagCompound.get().cast(DatFile.getNbt()) };
-		}
+		if (target == null) return new Object[] { NBTTagCompound.get().cast(DatFile.getNbt()) };
+		Object file = target.getSingle(e);
+		file = file.toString().endsWith(".dat") ? file.toString() : file.toString() + ".dat";
+		File f = new File(file.toString());
+		if(!f.exists()) return null;
+		SkriptNMS.getNMS().loadFileNbt(f);
+		return new Object[] { NBTTagCompound.get().cast(DatFile.getNbt()) };
+		
 	}
 
 	@Override
 	public void change(Event e, Object[] args, ChangeMode mode) {
 		File file;
-		if(target != null) {
-			Object f = target.getSingle(e);
-			f = f.toString().endsWith(".dat") ? f.toString() : f.toString() + ".dat";
-			file = new File(f.toString());	
-		}else{
-			file = DatFile.getFile();
-		}
+		if(target == null) file = DatFile.getFile();
+		Object f = target.getSingle(e);
+		f = f.toString().endsWith(".dat") ? f.toString() : f.toString() + ".dat";
+		file = new File(f.toString());		
 		
 		Object parsedNBT = null;
-		if (args != null) {
-			parsedNBT = NBTTagCompound.get().cast(NMS.parseRawNBT(((String) args[0])));
-		}
+		if (args != null) parsedNBT = NBTTagCompound.get().cast(SkriptNMS.getNMS().parseRawNBT(((String) args[0])));
 		
 		Object fileNBT = NBTTagCompound.get().cast(DatFile.getNbt());
 		if (mode == ChangeMode.ADD) {
-			NMS.addToCompound(NBTTagCompound.get().cast(fileNBT), NBTTagCompound.get().cast(parsedNBT));
-			NMS.setFileNBT(file, fileNBT);
+			SkriptNMS.getNMS().addToCompound(NBTTagCompound.get().cast(fileNBT), NBTTagCompound.get().cast(parsedNBT));
+			SkriptNMS.getNMS().setFileNBT(file, fileNBT);
 		} else if (mode == ChangeMode.REMOVE) {
 			for (Object s : args) {
-				NMS.removeFromCompound(NBTTagCompound.get().cast(fileNBT), (String) s);		
+				SkriptNMS.getNMS().removeFromCompound(NBTTagCompound.get().cast(fileNBT), (String) s);		
 			}
-			NMS.setFileNBT(file, fileNBT);
+			SkriptNMS.getNMS().setFileNBT(file, fileNBT);
 		}
 		
 	}

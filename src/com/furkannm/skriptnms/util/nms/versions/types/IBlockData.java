@@ -1,22 +1,23 @@
-package com.furkannm.skriptnms.util.nms.types;
+package com.furkannm.skriptnms.util.nms.versions.types;
 
-import com.furkannm.skriptnms.Core;
+import com.furkannm.skriptnms.SkriptNMS;
 import com.furkannm.skriptnms.util.nms.NMSClasses;
 
 @SuppressWarnings("rawtypes")
-public class BlockPosition extends NMSClasses{
+public class IBlockData extends NMSClasses{
 
 	private static Class nmsClass;
-		
+	
 	@Override
 	public void set() {
-		Class BlockPosition = null;
+		Class IBlockData = null;
 		try {
-			BlockPosition = Class.forName("net.minecraft.server."+Core.getVer()+".BlockPosition");
+			IBlockData = Class.forName("net.minecraft.server."+SkriptNMS.getVer()+".IBlockData");
 		} catch (SecurityException | ClassNotFoundException e) {
+
 			e.printStackTrace();
 		}
-		nmsClass = BlockPosition;
+		nmsClass = IBlockData;
 	}
 	
 	public static Class get() {

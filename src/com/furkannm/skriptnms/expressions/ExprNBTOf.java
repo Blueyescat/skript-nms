@@ -20,14 +20,11 @@ import ch.njol.skript.util.slot.Slot;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 
-import com.furkannm.skriptnms.util.nms.NMS;
-import com.furkannm.skriptnms.util.nms.types.NBTTagCompound;
+import com.furkannm.skriptnms.SkriptNMS;
+import com.furkannm.skriptnms.util.nms.versions.types.NBTTagCompound;
 
 @Name("NBT of")
-@Examples({
-		"on place of furnace:",
-	"\tadd \"{BurnTime:100s}\" to nbt of event-block"
-})
+@Examples({"on place of furnace:\n\tadd \"{BurnTime:100s}\" to nbt of event-block"})
 
 public class ExprNBTOf extends SimpleExpression<Object> {
 
@@ -53,9 +50,8 @@ public class ExprNBTOf extends SimpleExpression<Object> {
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean arg2, ParseResult result) {
 		target = (Expression<Object>) expr[0];
 		Class<?> type = target.getReturnType();
-		if (type != Entity.class || type != Block.class || type != ItemStack.class || type != Slot.class) {
+		if (type != Entity.class || type != Block.class || type != ItemStack.class || type != Slot.class) 
 			Skript.error(target.toString() + " is not entity, block or itemstack.", ErrorQuality.SEMANTIC_ERROR);
-		}
 		return true;
 	}
 
@@ -68,30 +64,24 @@ public class ExprNBTOf extends SimpleExpression<Object> {
 	@Nullable
 	protected Object[] get(Event e) {
 		Object tar = target.getSingle(e);
-		return NMS.getNBT(tar);
+		return SkriptNMS.getNMS().getNBT(tar);
 	}
 
 	@Override
 	public void change(Event e, Object[] args, ChangeMode mode) {
 		Object tar = target.getSingle(e);
 		Object parsedNBT = null;
-		if (args != null) {
-			parsedNBT = NBTTagCompound.get().cast(NMS.parseRawNBT(((String) args[0])));
-		}
-		if (mode == ChangeMode.ADD) {
-			NMS.addTargetsNBT(tar, parsedNBT);
-		}else if (mode == ChangeMode.REMOVE) {
-			NMS.removeTargetsNBT(tar, args);
-		}else if (mode == ChangeMode.DELETE || mode == ChangeMode.RESET) {
-			NMS.deleteTargetsNBT(tar);
-		}
+		if (args != null) parsedNBT = NBTTagCompound.get().cast(SkriptNMS.getNMS().parseRawNBT(((String) args[0])));
+		
+		if (mode == ChangeMode.ADD) SkriptNMS.getNMS().addTargetsNBT(tar, parsedNBT);
+		if (mode == ChangeMode.REMOVE) SkriptNMS.getNMS().removeTargetsNBT(tar, args);
+		if (mode == ChangeMode.DELETE || mode == ChangeMode.RESET) SkriptNMS.getNMS().deleteTargetsNBT(tar);
 	}
 
 	@Override
 	public Class<?>[] acceptChange(final ChangeMode mode) {
-		if (mode == ChangeMode.ADD || mode == ChangeMode.REMOVE || mode == ChangeMode.DELETE || mode == ChangeMode.RESET) {
+		if (mode == ChangeMode.ADD || mode == ChangeMode.REMOVE || mode == ChangeMode.DELETE || mode == ChangeMode.RESET)  
 			return CollectionUtils.array(String[].class);
-		}
 		return null;
 }
 	

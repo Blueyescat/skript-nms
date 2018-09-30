@@ -1,23 +1,23 @@
-package com.furkannm.skriptnms.util.nms.types;
+package com.furkannm.skriptnms.util.nms.versions.types;
 
-import com.furkannm.skriptnms.Core;
+import com.furkannm.skriptnms.SkriptNMS;
 import com.furkannm.skriptnms.util.nms.NMSClasses;
 
 @SuppressWarnings("rawtypes")
-public class NBTTagFloat extends NMSClasses{
+public class CraftWorld extends NMSClasses{
 
 	private static Class nmsClass;
 	
 	@Override
 	public void set() {
-		Class NBTTagFloat = null;
+		Class CraftWorld = null;
 		try {
-			NBTTagFloat = Class.forName("net.minecraft.server."+Core.getVer()+".NBTTagFloat");
+			CraftWorld = Class.forName("org.bukkit.craftbukkit."+SkriptNMS.getVer()+".CraftWorld");
 		} catch (SecurityException | ClassNotFoundException e) {
-			
+
 			e.printStackTrace();
 		}
-		nmsClass = NBTTagFloat;
+		nmsClass = CraftWorld;
 	}
 	
 	public static Class get() {

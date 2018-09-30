@@ -1,23 +1,23 @@
-package com.furkannm.skriptnms.util.nms.types;
+package com.furkannm.skriptnms.util.nms.versions.types;
 
-import com.furkannm.skriptnms.Core;
+import com.furkannm.skriptnms.SkriptNMS;
 import com.furkannm.skriptnms.util.nms.NMSClasses;
 
 @SuppressWarnings("rawtypes")
-public class ItemStack extends NMSClasses{
+public class World extends NMSClasses{
 
 	private static Class nmsClass;
 	
 	@Override
 	public void set() {
-		Class ItemStack = null;
+		Class World = null;
 		try {
-			ItemStack = Class.forName("net.minecraft.server."+Core.getVer()+".ItemStack");
+			World = Class.forName("net.minecraft.server."+SkriptNMS.getVer()+".World");
 		} catch (SecurityException | ClassNotFoundException e) {
-			
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		nmsClass = ItemStack;
+		nmsClass = World;
 	}
 	
 	public static Class get() {

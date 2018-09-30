@@ -1,6 +1,6 @@
 name: skript-nms
 author: FurkannM
 description: A Skript addon for NMS stuff
-version: 0.1.0
-main: com.furkannm.skriptnms.Core
+version: 0.1.1
+main: com.furkannm.skriptnms.SkriptNMS
 depend: [Skript]

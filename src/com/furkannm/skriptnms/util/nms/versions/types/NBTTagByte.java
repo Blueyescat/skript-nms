@@ -1,23 +1,23 @@
-package com.furkannm.skriptnms.util.nms.types;
+package com.furkannm.skriptnms.util.nms.versions.types;
 
-import com.furkannm.skriptnms.Core;
+import com.furkannm.skriptnms.SkriptNMS;
 import com.furkannm.skriptnms.util.nms.NMSClasses;
 
 @SuppressWarnings("rawtypes")
-public class MojangsonParser extends NMSClasses{
+public class NBTTagByte extends NMSClasses{
 
 	private static Class nmsClass;
 	
 	@Override
 	public void set() {
-		Class MojangsonParser = null;
+		Class NBTTagByte = null;
 		try {
-			MojangsonParser = Class.forName("net.minecraft.server."+Core.getVer()+".MojangsonParser");
+			NBTTagByte = Class.forName("net.minecraft.server."+SkriptNMS.getVer()+".NBTTagByte");
 		} catch (SecurityException | ClassNotFoundException e) {
 			
 			e.printStackTrace();
 		}
-		nmsClass = MojangsonParser;
+		nmsClass = NBTTagByte;
 	}
 	
 	public static Class get() {

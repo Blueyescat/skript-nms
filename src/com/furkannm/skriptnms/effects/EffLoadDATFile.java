@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import org.bukkit.event.Event;
 
-import com.furkannm.skriptnms.util.nms.NMS;
+import com.furkannm.skriptnms.SkriptNMS;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Examples;
@@ -17,17 +17,15 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 
 @Name("Load Dat File")
-@Examples({
-		"load nbt from \"world/level.dat\""
-})
+@Examples({"load nbt from \"world/level.dat\""})
 
-public class EffLoadDat extends Effect {
+public class EffLoadDATFile extends Effect {
 
 	static {
-		Skript.registerEffect(EffLoadDat.class, "load nbt[[ ]tag[s]] from [file] %string%","load %string%'s nbt[[ ]tag[s]]");
+		Skript.registerEffect(EffLoadDATFile.class, "load nbt[[ ]tag[s]] from [file] %string%","load %string%'s nbt[[ ]tag[s]]");
 	}
 	
-	//load dat file in %string%
+	//load nbt from %string%
 	private File lastLoadedFile = null;
 	private Expression<String> fileName;
 	
@@ -49,7 +47,7 @@ public class EffLoadDat extends Effect {
 		f = f.endsWith(".dat") ? f : f + ".dat";
 		lastLoadedFile = new File(f);
 		if(lastLoadedFile.exists()) {
-			NMS.loadFileNbt(lastLoadedFile);
+			SkriptNMS.getNMS().loadFileNbt(lastLoadedFile);
 		}else{
 			Skript.warning("Error when loading dat file");
 		}
