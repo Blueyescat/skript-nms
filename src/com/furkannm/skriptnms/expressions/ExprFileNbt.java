@@ -18,93 +18,74 @@ import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 
 import com.furkannm.skriptnms.SkriptNMS;
-import com.furkannm.skriptnms.util.nms.DatFile;
-import com.furkannm.skriptnms.util.nms.versions.types.NBTTagCompound;
+import com.furkannm.skriptnms.nms.DatFile;
+import com.furkannm.skriptnms.nms.NMS;
 
 @Name("File NBT")
-@Examples({"nbt from \"world/level.dat\"",
-		"last loaded file's nbt"})
+@Examples({"nbt from loaded dat file"})
 
 public class ExprFileNbt extends SimpleExpression<Object>{
 
 	static {
-		Skript.registerExpression(ExprFileNbt.class, Object.class, ExpressionType.PROPERTY, "nbt[[ ]tag[s]] from [file] %string%", "nbt[[ ]tag[s]] from last loaded [dat ]file", "last loaded [dat ]file's nbt[[ ]tag[s]]");
+		Skript.registerExpression(ExprFileNbt.class, Object.class, ExpressionType.SIMPLE, "nbt [tag[s]] (of|from) [the] [last[ly]] [loaded] dat file");
 	}
 	
-	private Expression<Object> target;
+	private Class<?> returnType = NMS.getMCClass("NBTTagCompound");
 	
-	@SuppressWarnings("unchecked")
-	@Override
-	public Class<? extends Object> getReturnType() {
-		return NBTTagCompound.get();
-	}
-
-	@Override
-	public boolean isSingle() {
-		return true;
-	}
-
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean arg2, ParseResult result) {
-		if(expr != null && expr.length>0) {
-			target = (Expression<Object>) expr[0];
-		}else{
-			target = null;
-		}
 		return true;
 	}
-
-	@Override
-	public String toString(@Nullable Event e, boolean debug) {
-		if(target != null) return "the NBT from file " + target.toString(e, debug);	
-		if(DatFile.getFile() != null) return "the NBT from file " + DatFile.getFile().getName();
-		return null;	
-	}
-
+	
 	@Override
 	@Nullable
 	protected Object[] get(Event e) {
-		if (target == null) return new Object[] { NBTTagCompound.get().cast(DatFile.getNbt()) };
-		Object file = target.getSingle(e);
-		file = file.toString().endsWith(".dat") ? file.toString() : file.toString() + ".dat";
-		File f = new File(file.toString());
-		if(!f.exists()) return null;
-		SkriptNMS.getNMS().loadFileNbt(f);
-		return new Object[] { NBTTagCompound.get().cast(DatFile.getNbt()) };
-		
-	}
-
-	@Override
-	public void change(Event e, Object[] args, ChangeMode mode) {
-		File file;
-		if(target == null) file = DatFile.getFile();
-		Object f = target.getSingle(e);
-		f = f.toString().endsWith(".dat") ? f.toString() : f.toString() + ".dat";
-		file = new File(f.toString());		
-		
-		Object parsedNBT = null;
-		if (args != null) parsedNBT = NBTTagCompound.get().cast(SkriptNMS.getNMS().parseRawNBT(((String) args[0])));
-		
-		Object fileNBT = NBTTagCompound.get().cast(DatFile.getNbt());
-		if (mode == ChangeMode.ADD) {
-			SkriptNMS.getNMS().addToCompound(NBTTagCompound.get().cast(fileNBT), NBTTagCompound.get().cast(parsedNBT));
-			SkriptNMS.getNMS().setFileNBT(file, fileNBT);
-		} else if (mode == ChangeMode.REMOVE) {
-			for (Object s : args) {
-				SkriptNMS.getNMS().removeFromCompound(NBTTagCompound.get().cast(fileNBT), (String) s);		
-			}
-			SkriptNMS.getNMS().setFileNBT(file, fileNBT);
+		if(DatFile.getFile() == null) {
+			Skript.error("Error when geting dat file's nbt");
+			return null;
 		}
-		
+		return new Object[] { returnType.cast(DatFile.getNbt()) };
 	}
-
+	
 	@Override
 	public Class<?>[] acceptChange(final ChangeMode mode) {
 		if (mode == ChangeMode.ADD || mode == ChangeMode.REMOVE) {
 			return CollectionUtils.array(String[].class);
 		}
 		return null;
-}
+	}
+	
+	@Override
+	public void change(Event e, Object[] args, ChangeMode mode) {
+		File file = DatFile.getFile();	
+		
+		Object fileNBT = returnType.cast(DatFile.getNbt());
+		if (mode == ChangeMode.ADD) {
+			Object parsedNBT = null;
+			if (args != null) parsedNBT = returnType.cast(SkriptNMS.getNMS().parseRawNBT(((String) args[0])));
+			SkriptNMS.getNMS().addToCompound(returnType.cast(fileNBT), returnType.cast(parsedNBT));
+			SkriptNMS.getNMS().setFileNBT(file, fileNBT);
+		} else if (mode == ChangeMode.REMOVE) {
+			for (Object s : args) {
+				SkriptNMS.getNMS().removeFromCompound(returnType.cast(fileNBT), (String) s);		
+			}
+			SkriptNMS.getNMS().setFileNBT(file, fileNBT);
+		}
+		
+	}
+	
+	@Override
+	public boolean isSingle() {
+		return true;
+	}
+	
+	@Override
+	public Class<? extends Object> getReturnType() {
+		return returnType;
+	}
 
+	@Override
+	public String toString(@Nullable Event e, boolean debug) {
+		return "the NBT from file " + DatFile.getFile().getName();
+	}
 }

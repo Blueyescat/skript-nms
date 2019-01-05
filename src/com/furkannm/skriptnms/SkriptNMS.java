@@ -5,10 +5,11 @@ import java.io.IOException;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.furkannm.skriptnms.util.nms.NMS;
-import com.furkannm.skriptnms.util.nms.NMSClasses;
-import com.furkannm.skriptnms.util.nms.versions.types.*;
-import com.furkannm.skriptnms.util.nms.versions.NMSReflection;
+import com.furkannm.skriptnms.nms.NMS;
+import com.furkannm.skriptnms.nms.NMSClasses;
+import com.furkannm.skriptnms.nms.versions.reflection.types.*;
+import com.furkannm.skriptnms.nms.versions.reflection.NMSReflection;
+import com.furkannm.skriptnms.util.BlockEvents;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
@@ -32,10 +33,11 @@ public class SkriptNMS extends JavaPlugin{
 		getLogger().info("Skript-NMS is started!");
 		ver = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
 		NMS.setDefaultNMS(new NMSReflection());
-		nmsclass = NMS.getNMSClass(getVer());
+		nmsclass = NMS.getNMS(getVer());
 		if(nmsclass instanceof NMSReflection) loadNMSClasses();
+		getServer().getPluginManager().registerEvents(new BlockEvents(), this);
 		try {
-			getAddonInstance().loadClasses("com.furkannm.skriptnms", "effects", "expressions");
+			getAddonInstance().loadClasses("com.furkannm.skriptnms", "effects", "expressions","events","other");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		

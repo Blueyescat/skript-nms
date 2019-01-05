@@ -6,26 +6,26 @@ import javax.annotation.Nullable;
 
 import org.bukkit.event.Event;
 
-import com.furkannm.skriptnms.SkriptNMS;
-
 import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
-import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
+import ch.njol.skript.util.AsyncEffect;
 import ch.njol.util.Kleenean;
 
-@Name("Load Dat File")
-@Examples({"load nbt from \"world/level.dat\""})
+import com.furkannm.skriptnms.SkriptNMS;
 
-public class EffLoadDATFile extends Effect {
+@Name("Load Dat File")
+@Examples({"load dat \"world/level.dat\""})
+
+public class EffLoadDATFile extends AsyncEffect {
 
 	static {
-		Skript.registerEffect(EffLoadDATFile.class, "load nbt[[ ]tag[s]] from [file] %string%","load %string%'s nbt[[ ]tag[s]]");
+		Skript.registerEffect(EffLoadDATFile.class, "load [the] dat [file] %string%");
 	}
 	
-	//load nbt from %string%
+	//load dat %string%
 	private File lastLoadedFile = null;
 	private Expression<String> fileName;
 	
@@ -38,7 +38,7 @@ public class EffLoadDATFile extends Effect {
 
 	@Override
 	public String toString(@Nullable Event e, boolean debug) {
-		return "the loaded NBT from file " + lastLoadedFile.toString();
+		return "the loaded dat file " + lastLoadedFile.toString();
 	}
 
 	@Override

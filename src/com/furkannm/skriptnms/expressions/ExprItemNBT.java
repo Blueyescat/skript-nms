@@ -29,16 +29,6 @@ public class ExprItemNBT extends SimpleExpression<ItemStack>{
 	private Expression<ItemStack> itemStack;
 	private Expression<String> string;
 	
-	@Override
-	public Class<? extends ItemStack> getReturnType() {
-		return ItemStack.class;
-	}
-
-	@Override
-	public boolean isSingle() {
-		return true;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean arg2, ParseResult result) {
@@ -46,12 +36,7 @@ public class ExprItemNBT extends SimpleExpression<ItemStack>{
 		string = (Expression<String>) expr[1];
 		return true;
 	}
-
-	@Override
-	public String toString(@Nullable Event e, boolean debug) {
-		return itemStack.toString(e, debug) + " with custom NBT " + string.toString(e, debug);
-	}
-
+	
 	@Override
 	@Nullable
 	protected ItemStack[] get(Event e) {
@@ -64,4 +49,18 @@ public class ExprItemNBT extends SimpleExpression<ItemStack>{
 		return new ItemStack[] { newItem };
 	}
 	
+	@Override
+	public boolean isSingle() {
+		return true;
+	}
+
+	@Override
+	public Class<? extends ItemStack> getReturnType() {
+		return ItemStack.class;
+	}
+
+	@Override
+	public String toString(@Nullable Event e, boolean debug) {
+		return itemStack.toString(e, debug) + " with custom NBT " + string.toString(e, debug);
+	}	
 }
