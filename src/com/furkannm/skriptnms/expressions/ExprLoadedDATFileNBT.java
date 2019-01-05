@@ -24,10 +24,10 @@ import com.furkannm.skriptnms.nms.NMS;
 @Name("File NBT")
 @Examples({"nbt from loaded dat file"})
 
-public class ExprFileNbt extends SimpleExpression<Object>{
+public class ExprLoadedDATFileNBT extends SimpleExpression<Object>{
 
 	static {
-		Skript.registerExpression(ExprFileNbt.class, Object.class, ExpressionType.SIMPLE, "nbt [tag[s]] (of|from) [the] [last[ly]] [loaded] dat file");
+		Skript.registerExpression(ExprLoadedDATFileNBT.class, Object.class, ExpressionType.SIMPLE, "nbt [tag[s]] (of|from) [the] [last[ly]] [loaded] dat file");
 	}
 	
 	private Class<?> returnType = NMS.getMCClass("NBTTagCompound");

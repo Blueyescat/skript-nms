@@ -9,7 +9,6 @@ import com.furkannm.skriptnms.nms.NMS;
 import com.furkannm.skriptnms.nms.NMSClasses;
 import com.furkannm.skriptnms.nms.versions.reflection.types.*;
 import com.furkannm.skriptnms.nms.versions.reflection.NMSReflection;
-import com.furkannm.skriptnms.util.BlockEvents;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAddon;
@@ -35,9 +34,8 @@ public class SkriptNMS extends JavaPlugin{
 		NMS.setDefaultNMS(new NMSReflection());
 		nmsclass = NMS.getNMS(getVer());
 		if(nmsclass instanceof NMSReflection) loadNMSClasses();
-		getServer().getPluginManager().registerEvents(new BlockEvents(), this);
 		try {
-			getAddonInstance().loadClasses("com.furkannm.skriptnms", "effects", "expressions","events","other");
+			getAddonInstance().loadClasses("com.furkannm.skriptnms", "effects", "expressions");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
