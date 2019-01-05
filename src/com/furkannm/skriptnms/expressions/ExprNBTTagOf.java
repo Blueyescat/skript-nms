@@ -23,7 +23,7 @@ public class ExprNBTTagOf extends SimpleExpression<Object> {
 
 	private Class<?> nbtBase = NMS.getMCClass("NBTBase");
 	static {
-		Skript.registerExpression(ExprNBTTagOf.class, Object.class, ExpressionType.PROPERTY, "nbt [tag[s]] %string% of %object%");
+		Skript.registerExpression(ExprNBTTagOf.class, Object.class, ExpressionType.PROPERTY, "[nbt] tag %string% of %object%");
 	}
 	
 	private Expression<String> tag;
