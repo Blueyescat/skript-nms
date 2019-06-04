@@ -72,7 +72,7 @@ public class NMSReflection extends NMS{
 		if (tar instanceof Entity) {
 			Object entNBT = NBTTagCompound.get().cast(getEntityNBT((Entity) tar));
 			for (Object s : nbt) {
-				if (s != "UUIDMost" && s != "UUIDLeast" && s != "WorldUUIDMost" && s != "WorldUUIDLeast" && s != "Bukkit.updateLevel") {
+				if (s != "UUIDMost" || s != "UUIDLeast" || s != "WorldUUIDMost" || s != "WorldUUIDLeast" || s != "Bukkit.updateLevel") {
 					removeFromCompound(NBTTagCompound.get().cast(entNBT), (String) s);
 				}
 			}
@@ -80,7 +80,7 @@ public class NMSReflection extends NMS{
 		}else if (tar instanceof Block) {
 			Object blockNBT = NBTTagCompound.get().cast(getTileNBT((Block) tar));
 			for (Object s : nbt) {
-				if (s != "x" && s != "y" && s != "z" && s != "id") {
+				if (s != "x" || s != "y" || s != "z" || s != "id") {
 					removeFromCompound(NBTTagCompound.get().cast(blockNBT), (String) s);
 				}
 			}
