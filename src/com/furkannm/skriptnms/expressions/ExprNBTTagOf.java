@@ -21,9 +21,9 @@ import com.furkannm.skriptnms.nms.NMS;
 
 public class ExprNBTTagOf extends SimpleExpression<Object> {
 
-	private Class<?> nbtBase = NMS.getMCClass("NBTBase");
+	private Class<?> nbtBase = SkriptNMS.getNMS().getBaseClass();
 	static {
-		Skript.registerExpression(ExprNBTTagOf.class, Object.class, ExpressionType.PROPERTY, "[nbt] tag %string% of %object%");
+		Skript.registerExpression(ExprNBTTagOf.class, Object.class, ExpressionType.PROPERTY, "[nbt] tag %string% of %compound%");
 	}
 	
 	private Expression<String> tag;

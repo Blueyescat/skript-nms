@@ -19,6 +19,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.slot.Slot;
 
 import com.furkannm.skriptnms.SkriptNMS;
@@ -71,7 +72,7 @@ public class NMSReflection extends NMS{
 		if (tar instanceof Entity) {
 			Object entNBT = NBTTagCompound.get().cast(getEntityNBT((Entity) tar));
 			for (Object s : nbt) {
-				if (s != "UUIDMost" || s != "UUIDLeast" || s != "WorldUUIDMost" || s != "WorldUUIDLeast" || s != "Bukkit.updateLevel") { 
+				if (s != "UUIDMost" && s != "UUIDLeast" && s != "WorldUUIDMost" && s != "WorldUUIDLeast" && s != "Bukkit.updateLevel") {
 					removeFromCompound(NBTTagCompound.get().cast(entNBT), (String) s);
 				}
 			}
@@ -79,7 +80,7 @@ public class NMSReflection extends NMS{
 		}else if (tar instanceof Block) {
 			Object blockNBT = NBTTagCompound.get().cast(getTileNBT((Block) tar));
 			for (Object s : nbt) {
-				if (s != "x" || s != "y" || s != "z" || s != "id") {
+				if (s != "x" && s != "y" && s != "z" && s != "id") {
 					removeFromCompound(NBTTagCompound.get().cast(blockNBT), (String) s);
 				}
 			}
@@ -446,6 +447,134 @@ public class NMSReflection extends NMS{
 				}
 			}
 		}
+	}
+
+	@Override
+	public Object[] getContents(Object nbtList) {
+		if (NBTTagList.get().isInstance(nbtList)) {
+			try {
+				Class TagList = NBTTagList.get();
+				int size = (int) TagList.cast(nbtList).getClass().getMethod("size").invoke(TagList.cast(nbtList));
+				Object[] contents = new Object[size];
+				for (int i = 0; i < size; i++) {
+					if (getIndex(nbtList, i) != null) {
+						contents[i] = getIndex(nbtList, i);
+					}
+				}
+				return contents;
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+					| NoSuchMethodException | SecurityException e) {
+				Skript.warning("Error when converting NBT - " + e.getMessage());
+				return null;
+			}	
+		}
+		return null;
+	}
+
+	@Override
+	public void addToList(Object nbtList, Object toAdd) {
+		if (NBTTagList.get().isInstance(nbtList) && NBTBase.get().isInstance(toAdd) ) {		
+			try {
+				Object TagList = NBTTagList.get().cast(nbtList);
+				Object Base = NBTBase.get().cast(toAdd);
+				TagList.getClass().getMethod("add", Base.getClass()).invoke(TagList, toAdd);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+					| NoSuchMethodException | SecurityException e) {
+				Skript.warning("Error when adding to list - " + e.getMessage());
+			}
+		}
+	}
+
+	@Override
+	public void removeFromList(Object nbtList, int index) {
+		try {
+			int size = (int) NBTTagList.get().cast(nbtList).getClass().getMethod("size").invoke(NBTTagList.get().cast(nbtList));
+			if (NBTTagList.get().isInstance(nbtList) && index >= 0 && index < size) {
+				Object TagList = NBTTagList.get().cast(nbtList);
+				TagList.getClass().getMethod("remove", int.class).invoke(TagList, index);;
+			}
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+				| SecurityException e) {
+			Skript.warning("Error when removing to list - " + e.getMessage());
+		}		
+	}
+
+	@Override
+	public void setIndex(Object nbtList, int index, Object toSet) {
+		try {
+			int size = (int) NBTTagList.get().cast(nbtList).getClass().getMethod("size").invoke(NBTTagList.get().cast(nbtList));
+			if (NBTTagList.get().isInstance(nbtList)  && index >= 0 && index < size) {
+				if (NBTBase.get().isInstance(toSet)) {
+					Object TagList = NBTTagList.get().cast(nbtList);
+					TagList.getClass().getMethod("a", int.class, NBTBase.get().getClass()).invoke(TagList, index, NBTBase.get().cast(toSet));
+				} else if (toSet instanceof Number) {
+					Object TagList = NBTTagList.get().cast(nbtList);
+					TagList.getClass().getMethod("a", int.class, NBTBase.get().getClass()).invoke(TagList, index, NBTBase.get().cast(convertToNBT((Number) toSet)));
+				} else if (toSet instanceof String) {
+					Object TagList = NBTTagList.get().cast(nbtList);
+					TagList.getClass().getMethod("a", int.class, NBTBase.get().getClass()).invoke(TagList, index, NBTBase.get().cast(convertToNBT((String) toSet)));
+				}
+			}
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+				| SecurityException e) {
+			Skript.warning("Error when setting index - " + e.getMessage());
+		}
+		
+	}
+
+	@Override
+	public Object getIndex(Object nbtList, int index) {
+		try {
+			int size = (int) NBTTagList.get().cast(nbtList).getClass().getMethod("size").invoke(NBTTagList.get().cast(nbtList));
+			if (NBTTagList.get().isInstance(nbtList) && index >= 0 && index < size) {
+				Object value = NBTTagList.get().cast(nbtList).getClass().getMethod("c", int.class).invoke(NBTTagList.get().cast(nbtList), index);
+				if (NBTTagByte.get().isInstance(value)) {
+					byte val = (byte) NBTTagByte.get().cast(value).getClass().getMethod("asByte").invoke(NBTTagByte.get().cast(value));
+					return val; 
+				} else if (NBTTagShort.get().isInstance(value)) {
+					short val = (short) NBTTagByte.get().cast(value).getClass().getMethod("asShort").invoke(NBTTagByte.get().cast(value));
+					return val; 
+				} else if (NBTTagInt.get().isInstance(value)) {
+					int val = (int) NBTTagByte.get().cast(value).getClass().getMethod("asInt").invoke(NBTTagByte.get().cast(value));
+					return val; 
+				} else if (NBTTagLong.get().isInstance(value)) {
+					long val = (long) NBTTagByte.get().cast(value).getClass().getMethod("asLong").invoke(NBTTagByte.get().cast(value));
+					return val; 
+				} else if (NBTTagFloat.get().isInstance(value)) {
+					float val = (float) NBTTagByte.get().cast(value).getClass().getMethod("asFloat").invoke(NBTTagByte.get().cast(value));
+					return val; 
+				} else if (NBTTagDouble.get().isInstance(value)) {
+					double val = (double) NBTTagByte.get().cast(value).getClass().getMethod("asDouble").invoke(NBTTagByte.get().cast(value));
+					return val; 
+				} else if (NBTTagString.get().isInstance(value)) {
+					String val = (String) NBTTagByte.get().cast(value).getClass().getMethod("asString").invoke(NBTTagByte.get().cast(value));
+					return val; 
+				} else if (NBTBase.get().isInstance(value)) {
+					return value; 
+				}
+			}
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+				| SecurityException e) {
+			Skript.warning("Error when getting index - " + e.getMessage());
+			return null;
+		}
+		
+		return null;
+	}
+
+	@Override
+	public Class getCompoundClass() {
+		return NBTTagCompound.get();
+	}
+
+	@Override
+	public Class getBaseClass() {
+		return NBTBase.get();
+	}
+
+	@Override
+	public void registerNbtCompound() {
+		Classes.registerClass(new NBTClassInfo(NBTTagCompound.get().getClass(), "compound").getClassInfo());
 	}
 
 }

@@ -11,28 +11,28 @@ import java.util.Arrays;
 
 import ch.njol.skript.classes.Changer;
 import ch.njol.util.coll.CollectionUtils;
-import net.minecraft.server.v1_12_R1.IBlockData;
-import net.minecraft.server.v1_12_R1.BlockPosition;
-import net.minecraft.server.v1_12_R1.MojangsonParser;
-import net.minecraft.server.v1_12_R1.NBTBase;
-import net.minecraft.server.v1_12_R1.NBTCompressedStreamTools;
-import net.minecraft.server.v1_12_R1.NBTTagByte;
-import net.minecraft.server.v1_12_R1.NBTTagCompound;
-import net.minecraft.server.v1_12_R1.NBTTagDouble;
-import net.minecraft.server.v1_12_R1.NBTTagFloat;
-import net.minecraft.server.v1_12_R1.NBTTagInt;
-import net.minecraft.server.v1_12_R1.NBTTagList;
-import net.minecraft.server.v1_12_R1.NBTTagLong;
-import net.minecraft.server.v1_12_R1.NBTTagShort;
-import net.minecraft.server.v1_12_R1.NBTTagString;
-import net.minecraft.server.v1_12_R1.TileEntity;
-import net.minecraft.server.v1_12_R1.World;
+import net.minecraft.server.v1_13_R2.IBlockData;
+import net.minecraft.server.v1_13_R2.NBTTagList;
+import net.minecraft.server.v1_13_R2.BlockPosition;
+import net.minecraft.server.v1_13_R2.MojangsonParser;
+import net.minecraft.server.v1_13_R2.NBTBase;
+import net.minecraft.server.v1_13_R2.NBTCompressedStreamTools;
+import net.minecraft.server.v1_13_R2.NBTTagByte;
+import net.minecraft.server.v1_13_R2.NBTTagCompound;
+import net.minecraft.server.v1_13_R2.NBTTagDouble;
+import net.minecraft.server.v1_13_R2.NBTTagFloat;
+import net.minecraft.server.v1_13_R2.NBTTagInt;
+import net.minecraft.server.v1_13_R2.NBTTagLong;
+import net.minecraft.server.v1_13_R2.NBTTagShort;
+import net.minecraft.server.v1_13_R2.NBTTagString;
+import net.minecraft.server.v1_13_R2.TileEntity;
+import net.minecraft.server.v1_13_R2.World;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_13_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_13_R2.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
@@ -46,7 +46,7 @@ import ch.njol.skript.util.slot.Slot;
 import com.furkannm.skriptnms.nms.DatFile;
 import com.furkannm.skriptnms.nms.NMS;
 
-public class v1_12_R1 extends NMS{
+public class v1_13_R2 extends NMS{
 
 	@Override
 	public Object[] getNBT(Object tar) {
@@ -182,9 +182,9 @@ public class v1_12_R1 extends NMS{
 
 	@Override
 	public Object getEntityNBT(Entity entity) {
-		net.minecraft.server.v1_12_R1.Entity nmsEntity = ((CraftEntity) entity).getHandle();
+		net.minecraft.server.v1_13_R2.Entity nmsEntity = ((CraftEntity) entity).getHandle();
 		NBTTagCompound NBT = new NBTTagCompound();
-		nmsEntity.save(NBT); //save? or c
+		nmsEntity.c(NBT); 
 		return NBT;
 	}
 
@@ -217,7 +217,7 @@ public class v1_12_R1 extends NMS{
 			TileEntity tileEntity = nmsWorld.getTileEntity(new BlockPosition(block.getX(), block.getY(), block.getZ()));
 			if (tileEntity == null)
 				return;
-			tileEntity.a((NBTTagCompound) newCompound);
+			tileEntity.load((NBTTagCompound) newCompound);
 			tileEntity.update();
 			IBlockData tileEntType = nmsWorld.getType(new BlockPosition(block.getX(),block.getY(),block.getZ()));
 			nmsWorld.notify(tileEntity.getPosition(), tileEntType, tileEntType, 3);
@@ -226,7 +226,7 @@ public class v1_12_R1 extends NMS{
 
 	@Override
 	public ItemStack getItemWithNBT(ItemStack itemStack, Object compound) {
-		net.minecraft.server.v1_12_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+		net.minecraft.server.v1_13_R2.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
 		if (compound instanceof NBTTagCompound && itemStack != null) {
 			if (itemStack.getType() == Material.AIR)
 				return null;
@@ -246,7 +246,7 @@ public class v1_12_R1 extends NMS{
 	@Override
 	public void setEntityNBT(Entity entity, Object newCompound) {
 		if (newCompound instanceof NBTTagCompound) {
-			net.minecraft.server.v1_12_R1.Entity nmsEntity = ((CraftEntity) entity).getHandle();
+			net.minecraft.server.v1_13_R2.Entity nmsEntity = ((CraftEntity) entity).getHandle();
 			nmsEntity.f((NBTTagCompound) newCompound);
 		}
 	}
@@ -315,7 +315,7 @@ public class v1_12_R1 extends NMS{
 			}
 		}
 	}
-
+	
 	@Override
 	public Object[] getContents(Object nbtList) {
 		if (nbtList instanceof NBTTagList) {
@@ -360,23 +360,23 @@ public class v1_12_R1 extends NMS{
 	@Override
 	public Object getIndex(Object nbtList, int index) {
 		if (nbtList instanceof NBTTagList && index >= 0 && index < ((NBTTagList) nbtList).size()) {
-			NBTBase value = ((NBTTagList) nbtList).i(index);
+			NBTBase value = ((NBTTagList) nbtList).c(index);
 			if (value instanceof NBTTagByte) {
-				return ((NBTTagByte) value).g(); 
+				return ((NBTTagByte) value).asByte(); 
 			} else if (value instanceof NBTTagShort) {
-				return ((NBTTagShort) value).f(); 
+				return ((NBTTagShort) value).asShort(); 
 			} else if (value instanceof NBTTagInt) {
-				return ((NBTTagInt) value).e(); 
+				return ((NBTTagInt) value).asInt(); 
 			} else if (value instanceof NBTTagLong) {
-				return ((NBTTagLong) value).d();
+				return ((NBTTagLong) value).asLong(); 
 			} else if (value instanceof NBTTagFloat) {
-				return ((NBTTagFloat) value).i(); 
+				return ((NBTTagFloat) value).asFloat();
 			} else if (value instanceof NBTTagDouble) {
 				return ((NBTTagDouble) value).asDouble(); 
 			} else if (value instanceof NBTTagString) {
-				return ((NBTTagString) value).c_();
+				return ((NBTTagString) value).asString(); 
 			} else if (value instanceof NBTBase) {
-				return value;
+				return value; 
 			}
 		}
 		return null;
@@ -453,4 +453,5 @@ public class v1_12_R1 extends NMS{
 				})
 		);
 	}
+
 }

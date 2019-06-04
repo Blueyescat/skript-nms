@@ -25,7 +25,6 @@ public class EffLoadDATFile extends AsyncEffect {
 		Skript.registerEffect(EffLoadDATFile.class, "load [the] dat [file] %string%");
 	}
 	
-	//load dat %string%
 	private File lastLoadedFile = null;
 	private Expression<String> fileName;
 	

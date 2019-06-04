@@ -6,6 +6,7 @@ import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.aliases.ItemType;
 import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
@@ -25,9 +26,10 @@ import com.furkannm.skriptnms.nms.NMS;
 
 public class ExprNBTOf extends PropertyExpression<Object,Object> {
 
-	private Class<?> returnType = NMS.getMCClass("NBTTagCompound");
+	private Class<?> returnType = SkriptNMS.getNMS().getCompoundClass();
 	static {
 		register(ExprNBTOf.class, Object.class, "nbt [tag[s]]", "objects");
+		//register(ExprNBTOf.class, Object.class, "nbt [tag[s]]", "compounds");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -35,7 +37,7 @@ public class ExprNBTOf extends PropertyExpression<Object,Object> {
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean arg2, ParseResult result) {
 		setExpr((Expression<Object>) expr[0]);
 		Class<?> type = getExpr().getReturnType();
-		if (type != Entity.class || type != Block.class || type != ItemStack.class || type != Slot.class) 
+		if (type != Entity.class && type != Block.class && type != ItemStack.class && type != Slot.class && type != ItemType.class)
 			Skript.error(getExpr().toString() + " is not entity, block or itemstack.", ErrorQuality.SEMANTIC_ERROR);
 		return true;
 	}
@@ -50,6 +52,9 @@ public class ExprNBTOf extends PropertyExpression<Object,Object> {
 	@Override
 	public void change(Event e, Object[] args, ChangeMode mode) {
 		Object tar = getExpr().getSingle(e);
+		if(tar instanceof ItemType) {
+			tar = ((ItemType)tar).getItem().getRandom();
+		}
 		Object parsedNBT = null;
 		if (args != null) parsedNBT = returnType.cast(SkriptNMS.getNMS().parseRawNBT(((String) args[0])));
 		
@@ -71,6 +76,9 @@ public class ExprNBTOf extends PropertyExpression<Object,Object> {
 	@Override
 	protected Object[] get(Event e, Object[] source) {
 		Object tar = getExpr().getSingle(e);
+		if(tar instanceof ItemType) {
+			tar = ((ItemType)tar).getItem().getRandom();
+		}
 		return SkriptNMS.getNMS().getNBT(tar);
 	}
 }

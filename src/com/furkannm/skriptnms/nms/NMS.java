@@ -12,6 +12,7 @@ import com.furkannm.skriptnms.nms.versions.v1_10_R1;
 import com.furkannm.skriptnms.nms.versions.v1_11_R1;
 import com.furkannm.skriptnms.nms.versions.v1_12_R1;
 import com.furkannm.skriptnms.nms.versions.v1_13_R1;
+import com.furkannm.skriptnms.nms.versions.v1_13_R2;
 import com.furkannm.skriptnms.nms.versions.v1_8_R3;
 import com.furkannm.skriptnms.nms.versions.v1_9_R1;
 import com.furkannm.skriptnms.nms.versions.reflection.NMSReflection;
@@ -20,31 +21,33 @@ public abstract class NMS {
 	public static NMS defaultNMS;
 	
 	public static NMS getNMS(String version) {
-		if(version.equalsIgnoreCase("v1_8_R3")) return new v1_8_R3();
-		if(version.equalsIgnoreCase("v1_9_R1")) return new v1_9_R1();
-		if(version.equalsIgnoreCase("v1_10_R1")) return new v1_10_R1();
-		if(version.equalsIgnoreCase("v1_11_R1")) return new v1_11_R1();
-		if(version.equalsIgnoreCase("v1_12_R1")) return new v1_12_R1();
-		if(version.equalsIgnoreCase("v1_13_R1")) return new v1_13_R1();
+		if (version.equalsIgnoreCase("v1_8_R3")) return new v1_8_R3();
+		if (version.equalsIgnoreCase("v1_9_R1")) return new v1_9_R1();
+		if (version.equalsIgnoreCase("v1_10_R1")) return new v1_10_R1();
+		if (version.equalsIgnoreCase("v1_11_R1")) return new v1_11_R1();
+		if (version.equalsIgnoreCase("v1_12_R1")) return new v1_12_R1();
+		if (version.equalsIgnoreCase("v1_13_R1")) return new v1_13_R1();
+		if (version.equalsIgnoreCase("v1_13_R2")) return new v1_13_R2();
 		return defaultNMS;
 	}
 	
-	public static Class<?> getMCClass(String classStr) {
+	/*public static Class<?> getMCClass(String classStr) {
 		String ver = SkriptNMS.getVer();
 		Class<?> nmsClass;
-		try{
-			if(!(getNMS(ver) instanceof NMSReflection)) {
+		try {
+			if (!(getNMS(ver) instanceof NMSReflection)) {
 				nmsClass = Class.forName("net.minecraft.server."+ver+"."+classStr);
-			}else{
+			} else {
 				nmsClass = Class.forName("com.furkannm.skriptnms.nms.versions.reflection.types."+classStr);
 				return nmsClass.getMethod("get", Class.class).invoke(nmsClass).getClass();
 			}
-		}catch(ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-			Bukkit.getLogger().warning("Unknown nms class!");
+		} catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			if(getNMS(ver) instanceof NMSReflection) Bukkit.getLogger().warning("Unknown " + classStr +" nms class for "+ver+"!");
+			else Bukkit.getLogger().warning("Unknown " + classStr +" bukkit class for "+ver+"!");
 			return null;
 		}
 		return nmsClass;
-	}
+	}*/
 	
 	public static void setDefaultNMS(NMS defaultClass) {
 		defaultNMS = defaultClass;
@@ -70,4 +73,15 @@ public abstract class NMS {
 	public abstract Object convertToNBT(String string);
 	public abstract void loadFileNbt(File file);
 	public abstract void setFileNBT(File file, Object newCompound);
+	
+	public abstract Object[] getContents(Object nbtList);
+	public abstract void addToList(Object nbtList, Object toAdd);
+	public abstract void removeFromList(Object nbtList, int index);
+	public abstract void setIndex(Object nbtList, int index, Object toSet);
+	public abstract Object getIndex(Object nbtList, int index);
+
+	public abstract Class getCompoundClass();
+	public abstract Class getBaseClass();
+	
+	public abstract void registerNbtCompound();
 }

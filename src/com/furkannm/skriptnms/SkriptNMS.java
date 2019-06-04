@@ -15,8 +15,8 @@ import ch.njol.skript.SkriptAddon;
 
 public class SkriptNMS extends JavaPlugin{
 	private static String ver;
-	private static SkriptNMS instance;
-	private static SkriptAddon addonInstance;
+	private SkriptNMS instance;
+	private SkriptAddon addonInstance;
 	private static NMS nmsclass;
 	
 	public SkriptNMS() {
@@ -29,11 +29,16 @@ public class SkriptNMS extends JavaPlugin{
 	
 	@Override
 	public void onEnable() {
-		getLogger().info("Skript-NMS is started!");
 		ver = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
 		NMS.setDefaultNMS(new NMSReflection());
 		nmsclass = NMS.getNMS(getVer());
-		if(nmsclass instanceof NMSReflection) loadNMSClasses();
+		nmsclass.registerNbtCompound();
+		String type = "default classes";
+		if (nmsclass instanceof NMSReflection) {
+			loadNMSClasses();
+			type = "reflection classes";
+		}
+		getLogger().info("Skript-NMS is started for "+ver+" with "+type+"!");
 		try {
 			getAddonInstance().loadClasses("com.furkannm.skriptnms", "effects", "expressions");
 		} catch (IOException e) {
@@ -76,6 +81,7 @@ public class SkriptNMS extends JavaPlugin{
 		NMSClasses.registerNMS(new NBTCompressedStreamTools());
 		NMSClasses.registerNMS(new NBTTagByte());
 		NMSClasses.registerNMS(new NBTTagCompound());
+		NMSClasses.registerNMS(new NBTTagList());
 		NMSClasses.registerNMS(new NBTTagDouble());
 		NMSClasses.registerNMS(new NBTTagFloat());
 		NMSClasses.registerNMS(new NBTTagInt());

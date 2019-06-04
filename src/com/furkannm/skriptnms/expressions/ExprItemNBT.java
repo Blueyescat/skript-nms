@@ -4,11 +4,11 @@ import javax.annotation.Nullable;
 
 import org.bukkit.Material;
 import org.bukkit.event.Event;
-import org.bukkit.inventory.ItemStack;
 
 import com.furkannm.skriptnms.SkriptNMS;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.aliases.ItemType;
 import ch.njol.skript.doc.Examples;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.lang.Expression;
@@ -18,35 +18,39 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 
 @Name("Item NBT")
-@Examples({"give diamond with nbt \"{display:{Name:\"SkriptNMS\",Lore:[\"Hello\",\"World\"]},Unbreakable:1}\" to player"})
+@Examples({"give diamond with nbt \"{display:{Name:\"\"SkriptNMS\"\",Lore:[\"\"Hello\"\",\"\"World\"\"]},Unbreakable:1}\" to player"})
 
-public class ExprItemNBT extends SimpleExpression<ItemStack>{	
+public class ExprItemNBT extends SimpleExpression<ItemType>{	
 	
 	static {
-		Skript.registerExpression(ExprItemNBT.class, ItemStack.class, ExpressionType.PROPERTY, "%itemstack% with [custom] nbt[[ ]tag[s]] %string%");
+		Skript.registerExpression(ExprItemNBT.class, ItemType.class, ExpressionType.COMBINED, "%itemtype% with [custom] nbt[[ ]tag[s]] %string%");
 	}
 	
-	private Expression<ItemStack> itemStack;
+	private Expression<ItemType> itemStack;
 	private Expression<String> string;
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean arg2, ParseResult result) {
-		itemStack = (Expression<ItemStack>) expr[0];
+		itemStack = (Expression<ItemType>) expr[0];
 		string = (Expression<String>) expr[1];
 		return true;
 	}
 	
 	@Override
 	@Nullable
-	protected ItemStack[] get(Event e) {
-		ItemStack item = itemStack.getSingle(e);
+	protected ItemType[] get(Event e) {
+		ItemType item = itemStack.getSingle(e);
 		String newTags = string.getSingle(e);
-		if(item.getType()==Material.AIR || item==null) return null;
+		if(item.getItem().getRandom().getType()==Material.AIR || item==null) {
+			Skript.error("Item is air or none! itemtype="+item.getItem()+",itemstack="+item.getItem().getRandom()+",type=" +(item!=null ? item.getItem().getRandom().getType() : ""));
+			
+			return null;
+		}
 		Object parsedNBT = null;
 		parsedNBT = SkriptNMS.getNMS().parseRawNBT(newTags);
-		ItemStack newItem = SkriptNMS.getNMS().getItemWithNBT(item, parsedNBT);
-		return new ItemStack[] { newItem };
+		ItemType newItem = new ItemType(SkriptNMS.getNMS().getItemWithNBT(item.getItem().getRandom(), parsedNBT));
+		return new ItemType[] { newItem };
 	}
 	
 	@Override
@@ -55,8 +59,8 @@ public class ExprItemNBT extends SimpleExpression<ItemStack>{
 	}
 
 	@Override
-	public Class<? extends ItemStack> getReturnType() {
-		return ItemStack.class;
+	public Class<? extends ItemType> getReturnType() {
+		return ItemType.class;
 	}
 
 	@Override

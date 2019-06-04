@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import ch.njol.skript.classes.Changer;
+import ch.njol.util.coll.CollectionUtils;
 import net.minecraft.server.v1_9_R1.IBlockData;
 import net.minecraft.server.v1_9_R1.BlockPosition;
 import net.minecraft.server.v1_9_R1.MojangsonParser;
@@ -19,6 +21,7 @@ import net.minecraft.server.v1_9_R1.NBTTagCompound;
 import net.minecraft.server.v1_9_R1.NBTTagDouble;
 import net.minecraft.server.v1_9_R1.NBTTagFloat;
 import net.minecraft.server.v1_9_R1.NBTTagInt;
+import net.minecraft.server.v1_9_R1.NBTTagList;
 import net.minecraft.server.v1_9_R1.NBTTagLong;
 import net.minecraft.server.v1_9_R1.NBTTagShort;
 import net.minecraft.server.v1_9_R1.NBTTagString;
@@ -34,6 +37,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.classes.ClassInfo;
+import ch.njol.skript.classes.Parser;
+import ch.njol.skript.lang.ParseContext;
+import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.slot.Slot;
 
 import com.furkannm.skriptnms.nms.DatFile;
@@ -307,6 +314,144 @@ public class v1_9_R1 extends NMS{
 				}
 			}
 		}
+	}
+	
+	@Override
+	public Object[] getContents(Object nbtList) {
+		if (nbtList instanceof NBTTagList) {
+			Object[] contents = new Object[((NBTTagList) nbtList).size()];
+			for (int i = 0; i < ((NBTTagList) nbtList).size(); i++) {
+				if (getIndex(nbtList, i) != null) {
+					contents[i] = getIndex(nbtList, i);
+				}
+			}
+			return contents;
+		}
+		return null;
+	}
+
+	@Override
+	public void addToList(Object nbtList, Object toAdd) {
+		if (nbtList instanceof NBTTagList && toAdd instanceof NBTBase) {
+			((NBTTagList) nbtList).add((NBTBase) toAdd);
+		}
+	}
+
+	@Override
+	public void removeFromList(Object nbtList, int index) {
+		if (nbtList instanceof NBTTagList && index >= 0 && index < ((NBTTagList) nbtList).size()) {
+			((NBTTagList) nbtList).remove(index);
+		}
+	}
+
+	@Override
+	public void setIndex(Object nbtList, int index, Object toSet) {
+		if (nbtList instanceof NBTTagList && index >= 0 && index < ((NBTTagList) nbtList).size()) {
+			if (toSet instanceof NBTBase) {
+				((NBTTagList) nbtList).a(index, (NBTBase) toSet);
+			} else if (toSet instanceof Number) {
+				((NBTTagList) nbtList).a(index, (NBTBase) convertToNBT((Number) toSet));
+			} else if (toSet instanceof String) {
+				((NBTTagList) nbtList).a(index, (NBTBase) convertToNBT((String) toSet));
+			}
+		}
+	}
+
+	@Override
+	public Object getIndex(Object nbtList, int index) {
+		if (nbtList instanceof NBTTagList && index >= 0 && index < ((NBTTagList) nbtList).size()) {
+			NBTBase value = ((NBTTagList) nbtList).h(index);
+			if (value instanceof NBTTagByte) {
+				return ((NBTTagByte) value).f();
+			} else if (value instanceof NBTTagShort) {
+				return ((NBTTagShort) value).e();
+			} else if (value instanceof NBTTagInt) {
+				return ((NBTTagInt) value).d();
+			} else if (value instanceof NBTTagLong) {
+				return ((NBTTagLong) value).c();
+			} else if (value instanceof NBTTagFloat) {
+				return ((NBTTagFloat) value).h();
+			} else if (value instanceof NBTTagDouble) {
+				return ((NBTTagDouble) value).g();
+			} else if (value instanceof NBTTagString) {
+				return ((NBTTagString) value).a_(); 
+			} else if (value instanceof NBTBase) {
+				return value;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public Class getCompoundClass() {
+		return NBTTagCompound.class;
+	}
+
+	@Override
+	public Class getBaseClass() {
+		return NBTBase.class;
+	}
+
+	@Override
+	public void registerNbtCompound() {
+		Classes.registerClass(new ClassInfo<NBTTagCompound>(NBTTagCompound.class, "compound")
+			.user("nbt ?(compound)?")
+			.name("NBT Compound")
+			.since("0.1.3")
+			.parser(new Parser<NBTTagCompound>() {
+
+				@Override
+				public String getVariableNamePattern() {
+					return ".+";
+				}
+				
+				@Override
+				@javax.annotation.Nullable
+				public NBTTagCompound parse(String s, ParseContext context) {
+					if (s.startsWith("nbt:{") && s.endsWith("}")) {
+						NBTTagCompound nbt = (NBTTagCompound) parseRawNBT(s.substring(4));
+						return nbt;
+					}
+					return null;
+				}
+
+				@Override
+				public String toString(NBTTagCompound nbt, int arg1) {
+					return nbt.toString();
+				}
+
+				@Override
+				public String toVariableNameString(NBTTagCompound nbt) {		
+					return nbt.toString();
+				}	
+			}).changer(new Changer<NBTTagCompound>() {
+					@Override
+					public Class<?>[] acceptChange(ChangeMode mode) {
+						if (mode == ChangeMode.ADD || mode == ChangeMode.REMOVE) {
+							return CollectionUtils.array(String.class, NBTTagCompound.class);
+						}
+						return null;
+					}
+
+					@Override
+					public void change(NBTTagCompound[] compounds, Object[] values, ChangeMode mode) {
+						if (mode == ChangeMode.ADD) {
+							if (values[0] instanceof String) {
+								Object parsedNBT = parseRawNBT((String) values[0]);
+								addToCompound(compounds[0], parsedNBT);
+							} else {
+								addToCompound(compounds[0], values[0]);
+							}
+						} else if (mode == ChangeMode.REMOVE) {
+							if (values[0] instanceof NBTTagCompound)
+								return;
+							for (Object s : values) {
+								compounds[0].remove((String) s);
+							}
+						}
+					}
+				})
+		);
 	}
 
 }

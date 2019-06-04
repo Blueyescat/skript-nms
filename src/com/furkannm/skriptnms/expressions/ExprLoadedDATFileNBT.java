@@ -30,7 +30,7 @@ public class ExprLoadedDATFileNBT extends SimpleExpression<Object>{
 		Skript.registerExpression(ExprLoadedDATFileNBT.class, Object.class, ExpressionType.SIMPLE, "nbt [tag[s]] (of|from) [the] [last[ly]] [loaded] dat file");
 	}
 	
-	private Class<?> returnType = NMS.getMCClass("NBTTagCompound");
+	private Class<?> returnType = SkriptNMS.getNMS().getCompoundClass();
 	
 	@Override
 	public boolean init(Expression<?>[] expr, int matchedPattern, Kleenean arg2, ParseResult result) {
